@@ -92,3 +92,36 @@ def run_vertical(job_id: str):
         "job_id": job_id,
         "vertical_clips": outputs
     }
+
+def run_all(job_id: str):
+
+    results = {}
+
+    print("\n🚀 RUN ALL PIPELINE START\n")
+
+    results["ingest"] = run_ingest(job_id)
+    print("✅ ingest done")
+
+    results["transcribe"] = run_transcribe(job_id)
+    print("✅ transcribe done")
+
+    results["segment"] = run_segment(job_id)
+    print("✅ segment done")
+
+    results["score"] = run_score(job_id)
+    print("✅ score done")
+
+    results["cut"] = run_cut(job_id)
+    print("✅ cut done")
+
+    # use whichever final stage you built
+    results["vertical"] = run_vertical(job_id)
+    print("✅ vertical+captions done")
+
+    print("\n🏁 RUN ALL PIPELINE COMPLETE\n")
+
+    return {
+        "job_id": job_id,
+        "stages": list(results.keys()),
+        "outputs": results
+    }
