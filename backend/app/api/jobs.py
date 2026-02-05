@@ -3,6 +3,8 @@ from app.pipeline.pipeline import run_ingest
 from app.pipeline.pipeline import run_transcribe
 from app.pipeline.pipeline import run_segment
 from app.pipeline.pipeline import run_score
+from app.pipeline.pipeline import run_cut
+
 
 
 import shutil
@@ -64,3 +66,7 @@ def segment_job(job_id: str):
 @router.post("/{job_id}/score")
 def score_job(job_id: str):
     return run_score(job_id)
+
+@router.post("/{job_id}/cut")
+def cut_job(job_id: str):
+    return run_cut(job_id)

@@ -3,6 +3,7 @@ from app.pipeline.stages.ingest import extract_audio
 from app.pipeline.stages.transcribe import run_transcription
 from app.pipeline.stages.segment import build_segments
 from app.pipeline.stages.score import run_scoring
+from app.pipeline.stages.cut import cut_top_clips
 
 
 
@@ -54,4 +55,15 @@ def run_score(job_id: str):
     return {
         "job_id": job_id,
         "ranked": str(out)
+    }
+
+def run_cut(job_id: str):
+    base = Path(__file__).resolve().parents[3]
+    job_dir = base / "data" / "jobs" / job_id
+
+    clips = cut_top_clips(job_dir)
+
+    return {
+        "job_id": job_id,
+        "clips": clips
     }
