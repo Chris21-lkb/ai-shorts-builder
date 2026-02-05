@@ -5,6 +5,8 @@ from app.pipeline.pipeline import run_segment
 from app.pipeline.pipeline import run_score
 from app.pipeline.pipeline import run_cut
 from app.pipeline.pipeline import run_captions
+from app.pipeline.pipeline import run_vertical
+
 
 
 
@@ -76,3 +78,7 @@ def cut_job(job_id: str):
 @router.post("/{job_id}/captions")
 def captions_job(job_id: str):
     return run_captions(job_id)
+
+@router.post("/{job_id}/vertical")
+def vertical_job(job_id: str):
+    return run_vertical(job_id)

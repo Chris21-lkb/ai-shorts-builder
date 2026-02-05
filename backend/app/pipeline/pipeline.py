@@ -5,6 +5,8 @@ from app.pipeline.stages.segment import build_segments
 from app.pipeline.stages.score import run_scoring
 from app.pipeline.stages.cut import cut_top_clips
 from app.pipeline.stages.captions import burn_captions
+from app.pipeline.stages.vertical import convert_vertical
+
 
 
 
@@ -78,4 +80,15 @@ def run_captions(job_id: str):
     return {
         "job_id": job_id,
         "captioned_clips": outputs
+    }
+
+def run_vertical(job_id: str):
+    base = Path(__file__).resolve().parents[3]
+    job_dir = base / "data" / "jobs" / job_id
+
+    outputs = convert_vertical(job_dir)
+
+    return {
+        "job_id": job_id,
+        "vertical_clips": outputs
     }
