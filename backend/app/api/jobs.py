@@ -1,4 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from app.pipeline.pipeline import run_ingest
+from app.pipeline.pipeline import run_transcribe
 import shutil
 from pathlib import Path
 import uuid
@@ -41,3 +43,12 @@ async def upload_video(file: UploadFile = File(...)):
         "job_id": job_id,
         "saved": str(input_path)
     }
+
+@router.post("/{job_id}/ingest")
+def ingest_job(job_id: str):
+    result = run_ingest(job_id)
+    return result
+
+@router.post("/{job_id}/transcribe")
+def transcribe_job(job_id: str):
+    return run_transcribe(job_id)
