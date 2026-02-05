@@ -13,4 +13,4 @@ def run_ffmpeg(cmd: list[str]):
     print (result.stdout)
 
     if result.returncode != 0:
-        raise RuntimeError("ffmpeg command failed")
+        raise RuntimeError(f"ffmpeg failed:\n{result.stdout}")

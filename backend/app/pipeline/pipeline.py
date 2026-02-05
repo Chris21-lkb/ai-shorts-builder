@@ -4,6 +4,7 @@ from app.pipeline.stages.transcribe import run_transcription
 from app.pipeline.stages.segment import build_segments
 from app.pipeline.stages.score import run_scoring
 from app.pipeline.stages.cut import cut_top_clips
+from app.pipeline.stages.captions import burn_captions
 
 
 
@@ -66,4 +67,15 @@ def run_cut(job_id: str):
     return {
         "job_id": job_id,
         "clips": clips
+    }
+
+def run_captions(job_id: str):
+    base = Path(__file__).resolve().parents[3]
+    job_dir = base / "data" / "jobs" / job_id
+
+    outputs = burn_captions(job_dir)
+
+    return {
+        "job_id": job_id,
+        "captioned_clips": outputs
     }

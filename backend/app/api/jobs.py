@@ -4,6 +4,8 @@ from app.pipeline.pipeline import run_transcribe
 from app.pipeline.pipeline import run_segment
 from app.pipeline.pipeline import run_score
 from app.pipeline.pipeline import run_cut
+from app.pipeline.pipeline import run_captions
+
 
 
 
@@ -70,3 +72,7 @@ def score_job(job_id: str):
 @router.post("/{job_id}/cut")
 def cut_job(job_id: str):
     return run_cut(job_id)
+
+@router.post("/{job_id}/captions")
+def captions_job(job_id: str):
+    return run_captions(job_id)
