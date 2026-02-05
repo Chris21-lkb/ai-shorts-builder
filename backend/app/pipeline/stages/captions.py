@@ -11,26 +11,78 @@ def format_ts(t: float):
     ms = int((t - int(t)) * 1000)
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
 
+### original one
 
-def build_srt(segments, start, end, out_path: Path):
+# def build_srt(segments, start, end, out_path: Path):
 
+#     idx = 1
+#     lines = []
+
+#     for seg in segments:
+#         if seg["end"] < start or seg["start"] > end:
+#             continue
+
+#         s = max(seg["start"], start) - start
+#         e = min(seg["end"], end) - start
+
+#         lines.append(str(idx))
+#         lines.append(f"{format_ts(s)} --> {format_ts(e)}")
+#         lines.append(seg["text"])
+#         lines.append("")
+#         idx += 1
+
+#     out_path.write_text("\n".join(lines), encoding="utf-8")
+
+
+
+
+# --------------------------------------------------------------------------#
+def build_srt(segments, start, end, out_path: Path, max_words=4):
     idx = 1
     lines = []
 
     for seg in segments:
+        # 1. Skip segments entirely outside the clip range
         if seg["end"] < start or seg["start"] > end:
             continue
 
-        s = max(seg["start"], start) - start
-        e = min(seg["end"], end) - start
+        # 2. Calculate the relative start and end times for this segment
+        s_seg = max(seg["start"], start) - start
+        e_seg = min(seg["end"], end) - start
+        duration = e_seg - s_seg
 
-        lines.append(str(idx))
-        lines.append(f"{format_ts(s)} --> {format_ts(e)}")
-        lines.append(seg["text"])
-        lines.append("")
-        idx += 1
+        # 3. Split the segment text into individual words
+        words = seg["text"].strip().split()
+        
+        if not words:
+            continue
 
+        # 4. Group words into chunks of 'max_words' (e.g., 4 words at a time)
+        for i in range(0, len(words), max_words):
+            chunk = words[i : i + max_words]
+            chunk_text = " ".join(chunk)
+
+            # 5. Estimate timing for this chunk
+            # We divide the total segment duration by the number of chunks
+            num_chunks = (len(words) + max_words - 1) // max_words
+            chunk_duration = duration / num_chunks
+            
+            c_start = s_seg + (i // max_words) * chunk_duration
+            c_end = c_start + chunk_duration
+
+            # 6. Add to SRT lines
+            lines.append(str(idx))
+            lines.append(f"{format_ts(c_start)} --> {format_ts(c_end)}")
+            lines.append(chunk_text.upper()) # Uppercase is usually better for Shorts
+            lines.append("")
+            idx += 1
+
+    # 7. Write the file
     out_path.write_text("\n".join(lines), encoding="utf-8")
+# ---------------------------------------------------------------------------------------------#
+
+
+
 
 
 # def burn_captions(job_dir: Path):
