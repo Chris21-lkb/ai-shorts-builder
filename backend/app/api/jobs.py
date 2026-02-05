@@ -1,6 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.pipeline.pipeline import run_ingest
 from app.pipeline.pipeline import run_transcribe
+from app.pipeline.pipeline import run_segment
+
 import shutil
 from pathlib import Path
 import uuid
@@ -52,3 +54,7 @@ def ingest_job(job_id: str):
 @router.post("/{job_id}/transcribe")
 def transcribe_job(job_id: str):
     return run_transcribe(job_id)
+
+@router.post("/{job_id}/segment")
+def segment_job(job_id: str):
+    return run_segment(job_id)

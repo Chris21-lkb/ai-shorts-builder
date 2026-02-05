@@ -1,6 +1,7 @@
 from pathlib import Path
 from app.pipeline.stages.ingest import extract_audio
 from app.pipeline.stages.transcribe import run_transcription
+from app.pipeline.stages.segment import build_segments
 
 
 
@@ -29,4 +30,15 @@ def run_transcribe(job_id: str):
     return {
         "job_id": job_id,
         "transcript": str(transcript_path)
+    }
+
+def run_segment(job_id: str):
+    base = Path(__file__).resolve().parents[3]
+    job_dir = base / "data" / "jobs" / job_id
+
+    out = build_segments(job_dir)
+
+    return {
+        "job_id": job_id,
+        "candidates": str(out)
     }
