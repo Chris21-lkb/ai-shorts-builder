@@ -6,6 +6,7 @@ from app.pipeline.stages.score import run_scoring
 from app.pipeline.stages.cut import cut_top_clips
 from app.pipeline.stages.captions import burn_captions
 from app.pipeline.stages.vertical import convert_vertical
+from app.utils.status import write_status
 
 
 
@@ -95,33 +96,42 @@ def run_vertical(job_id: str):
 
 def run_all(job_id: str):
 
+    base = Path(__file__).resolve().parents[3]
+    job_dir = base / "data" / "jobs" / job_id
+
+    stages = [
+        ("ingest", run_ingest),
+        ("transcribe", run_transcribe),
+        ("segment", run_segment),
+        ("score", run_score),
+        ("cut", run_cut),
+        ("vertical", run_vertical),
+    ]
+
+    total = len(stages)
     results = {}
 
     print("\n🚀 RUN ALL PIPELINE START\n")
 
-    results["ingest"] = run_ingest(job_id)
-    print("✅ ingest done")
+    for i, (name, fn) in enumerate(stages, start=1):
 
-    results["transcribe"] = run_transcribe(job_id)
-    print("✅ transcribe done")
+        write_status(job_dir, name, "running", i-1, total)
 
-    results["segment"] = run_segment(job_id)
-    print("✅ segment done")
+        try:
+            results[name] = fn(job_id)
+            write_status(job_dir, name, "done", i, total)
+            print(f"✅ {name} done")
 
-    results["score"] = run_score(job_id)
-    print("✅ score done")
+        except Exception as e:
+            write_status(job_dir, name, "failed", i-1, total)
+            print(f"❌ {name} failed")
+            raise
 
-    results["cut"] = run_cut(job_id)
-    print("✅ cut done")
-
-    # use whichever final stage you built
-    results["vertical"] = run_vertical(job_id)
-    print("✅ vertical+captions done")
+    write_status(job_dir, "complete", "done", total, total)
 
     print("\n🏁 RUN ALL PIPELINE COMPLETE\n")
 
     return {
         "job_id": job_id,
-        "stages": list(results.keys()),
         "outputs": results
     }

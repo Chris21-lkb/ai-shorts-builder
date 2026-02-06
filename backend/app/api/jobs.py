@@ -8,7 +8,7 @@ from app.pipeline.pipeline import run_captions
 from app.pipeline.pipeline import run_vertical
 from app.pipeline.pipeline import run_all
 
-
+from app.utils.status import read_status
 
 
 
@@ -88,3 +88,11 @@ def vertical_job(job_id: str):
 @router.post("/{job_id}/run_all")
 def run_all_job(job_id: str):
     return run_all(job_id)
+
+@router.get("/{job_id}/status")
+def job_status(job_id: str):
+
+    base = Path(__file__).resolve().parents[3]
+    job_dir = base / "data" / "jobs" / job_id
+
+    return read_status(job_dir)
