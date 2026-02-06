@@ -134,3 +134,21 @@ def get_clip(job_id: str, filename: str):
     path = base / "data" / "jobs" / job_id / "clips_vertical_final" / filename
 
     return FileResponse(path)
+
+@router.get("/{job_id}/download/{name}")
+def download_clip(job_id: str, name: str):
+
+    job_dir = DATA_DIR / job_id
+
+    print("BASE_DIR:", BASE_DIR)
+    print("job_dir:", job_dir)
+
+    for p in job_dir.rglob(name):
+        print("FOUND:", p)
+        return FileResponse(
+            p,
+            media_type="video/mp4",
+            filename=name,
+        )
+
+    raise HTTPException(404, "Clip not found")

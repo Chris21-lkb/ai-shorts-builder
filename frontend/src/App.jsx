@@ -131,9 +131,10 @@ export default function App() {
                 />
                 <div className="clip-footer">
                   <span>{name}</span>
-                  <a href={`${API}/${jobId}/clips/${name}`} download>
+                  {/* <a href={`${API}/${jobId}/clips/${name}`} download>
                     Download
-                  </a>
+                  </a> */}
+                  <a href={`${API}/${jobId}/download/${name}`} className="download-btn">⬇ Download</a>
                 </div>
               </div>
             ))}

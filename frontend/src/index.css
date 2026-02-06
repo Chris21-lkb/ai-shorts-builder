@@ -114,3 +114,17 @@ a {
   color: #7aa2ff;
   text-decoration: none;
 }
+
+.download-btn {
+  background: #1f2937;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #e6edf3;
+  border: 1px solid #2a3441;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  background: #2a3441;
+}
