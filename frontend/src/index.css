@@ -1,91 +1,166 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  background: #0f172a;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  background: linear-gradient(180deg, #0f172a, #0b1220);
   color: #e5e7eb;
-  font-family: system-ui, Arial;
 }
 
-.page {
-  max-width: 1300px;
-  margin: 30px auto;
-  padding: 20px;
-}
+/* ---------- top bar ---------- */
 
-.header {
+.topbar {
+  height: 64px;
+  padding: 0 28px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  background: #0b1220;
+  border-bottom: 1px solid #1f2937;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .badge {
+  font-size: 12px;
   background: #1f2937;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: 10px;
+  opacity: 0.9;
 }
+
+/* ---------- layout ---------- */
 
 .layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 360px 1fr;
   gap: 24px;
+  padding: 24px;
 }
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.right-panel {
+  background: #020617;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #1f2937;
+}
+
+/* ---------- cards ---------- */
 
 .card {
   background: #020617;
+  border-radius: 16px;
+  padding: 18px;
   border: 1px solid #1f2937;
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 16px;
 }
 
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+/* ---------- buttons ---------- */
+
 .btn {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: #374151;
-  color: white;
-  text-decoration: none;
-  cursor: pointer;
   border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
 .btn.primary {
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: linear-gradient(90deg, #7c3aed, #6366f1);
+  color: white;
 }
 
-.btn.success {
-  background: linear-gradient(90deg, #10b981, #06b6d4);
+.btn.accent {
+  background: linear-gradient(90deg, #14b8a6, #06b6d4);
+  color: white;
+}
+
+.btn.ghost {
+  background: #1f2937;
+  color: #e5e7eb;
 }
 
 .btn.small {
-  width: 100%;
-  font-size: 14px;
+  font-size: 13px;
+  padding: 6px 10px;
+  margin-top: 8px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- progress ---------- */
+
+.progress {
+  height: 10px;
+  background: #111827;
+  border-radius: 999px;
+  margin-top: 12px;
+  overflow: hidden;
 }
 
 .progress-bar {
-  height: 10px;
-  background: #1f2937;
-  border-radius: 999px;
-  overflow: hidden;
-  margin-top: 12px;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #06b6d4);
+  transition: width 0.4s ease;
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #6366f1, #22d3ee);
+.progress-text {
+  font-size: 13px;
+  margin-top: 6px;
+  opacity: 0.8;
 }
+
+/* ---------- clips grid ---------- */
 
 .clips-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.clip-card {
+  background: #020617;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 10px;
+  text-align: center;
 }
 
 .clip-card video {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
+  background: black;
 }
 
-.muted {
-  color: #94a3b8;
+/* ---------- misc ---------- */
+
+.job-id {
+  font-size: 12px;
+  opacity: 0.7;
+  word-break: break-all;
+}
+
+.empty {
+  opacity: 0.6;
+  padding: 20px 0;
 }

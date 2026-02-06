@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const API = "http://127.0.0.1:8000/jobs";
+const STAGE_COUNT = 7;
+
+function stageToPercent(status) {
+  if (!status) return 0;
+  if (status.state === "done") return 100;
+  const p = status.progress ?? 0;
+  return Math.min(100, Math.round((p / STAGE_COUNT) * 100));
+}
 
 export default function App() {
   const [file, setFile] = useState(null);
@@ -9,6 +17,7 @@ export default function App() {
   const [clips, setClips] = useState([]);
   const [running, setRunning] = useState(false);
 
+  // ---------- upload ----------
   async function uploadFile() {
     const form = new FormData();
     form.append("file", file);
@@ -20,9 +29,14 @@ export default function App() {
 
     const data = await res.json();
     setJobId(data.job_id);
+    setStatus(null);
+    setClips([]);
   }
 
+  // ---------- pipeline ----------
   async function startPipeline() {
+    if (!jobId) return;
+
     setRunning(true);
 
     await fetch(`${API}/${jobId}/run_all_async`, {
@@ -52,22 +66,31 @@ export default function App() {
     setClips(data.clips || []);
   }
 
-  const progress = status?.progress ?? 0; // ✅ no ×100
+  // ---------- downloads ----------
+  function downloadClip(name) {
+    window.location.href = `${API}/${jobId}/download/${name}`;
+  }
+
+  function downloadAll() {
+    clips.forEach((name, i) => {
+      setTimeout(() => downloadClip(name), i * 400);
+    });
+  }
+
+  const progress = stageToPercent(status);
 
   return (
-    <div className="page">
-
-      {/* Header */}
-      <header className="header">
-        <h1>🎬 AI Shorts Studio</h1>
-        <span className="badge">MVP</span>
+    <div className="app-root">
+      {/* HEADER */}
+      <header className="topbar">
+        <div className="logo">🎬 AI Shorts Studio</div>
+        <div className="badge">MVP</div>
       </header>
 
+      {/* MAIN LAYOUT */}
       <div className="layout">
-
         {/* LEFT PANEL */}
-        <div className="left">
-
+        <div className="left-panel">
           <div className="card">
             <h3>Upload Video</h3>
 
@@ -85,84 +108,70 @@ export default function App() {
               Upload
             </button>
 
-            {jobId && <p className="muted">Job: {jobId}</p>}
+            {jobId && <p className="job-id">Job: {jobId}</p>}
           </div>
-
-          {jobId && (
-            <div className="card">
-              <h3>Pipeline</h3>
-
-              <button
-                className="btn success"
-                onClick={startPipeline}
-                disabled={running}
-              >
-                {running ? "Processing…" : "Generate Shorts"}
-              </button>
-
-              {status && (
-                <>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <div className="muted">
-                    {status.stage} • {progress}%
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* ✅ Download all */}
-          {clips.length > 0 && (
-            <div className="card">
-              <a
-                href={`${API}/${jobId}/download_zip`}
-                className="btn"
-              >
-                Download All Shorts
-              </a>
-            </div>
-          )}
-
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className="right">
 
           <div className="card">
-            <h3>Generated Shorts</h3>
+            <h3>Pipeline</h3>
 
-            {clips.length === 0 && (
-              <p className="muted">No clips yet</p>
-            )}
+            <button
+              className="btn accent"
+              onClick={startPipeline}
+              disabled={!jobId || running}
+            >
+              Generate Shorts
+            </button>
 
-            <div className="clips-grid">
-              {clips.map((name) => (
-                <div key={name} className="clip-card">
-                  <video
-                    src={`${API}/${jobId}/clips/${name}`}
-                    controls
-                  />
-
-                  <a
-                    href={`${API}/${jobId}/download/${name}`}
-                    className="btn small"
-                    download
-                  >
-                    Download
-                  </a>
-                </div>
-              ))}
+            <div className="progress">
+              <div
+                className="progress-bar"
+                style={{ width: `${progress}%` }}
+              />
             </div>
 
+            <div className="progress-text">
+              {running ? `${progress}%` : status?.state || "idle"}
+            </div>
           </div>
 
+          <div className="card">
+            <button
+              className="btn ghost"
+              disabled={!clips.length}
+              onClick={downloadAll}
+            >
+              Download All Shorts
+            </button>
+          </div>
         </div>
 
+        {/* RIGHT PANEL — SHORTS */}
+        <div className="right-panel">
+          <h3>Generated Shorts</h3>
+
+          {clips.length === 0 && (
+            <div className="empty">
+              No shorts yet — run the pipeline.
+            </div>
+          )}
+
+          <div className="clips-grid">
+            {clips.map((name) => (
+              <div key={name} className="clip-card">
+                <video
+                  src={`${API}/${jobId}/clips/${name}`}
+                  controls
+                />
+                <button
+                  className="btn small"
+                  onClick={() => downloadClip(name)}
+                >
+                  Download
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
