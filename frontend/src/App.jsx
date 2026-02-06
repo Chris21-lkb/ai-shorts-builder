@@ -24,11 +24,15 @@ export default function App() {
 
   async function startPipeline() {
     setRunning(true);
-    await fetch(`${API}/${jobId}/run_all_async`, { method: "POST" });
+
+    await fetch(`${API}/${jobId}/run_all_async`, {
+      method: "POST",
+    });
+
     pollStatus(jobId);
   }
 
-  async function pollStatus(id) {
+  function pollStatus(id) {
     const timer = setInterval(async () => {
       const res = await fetch(`${API}/${id}/status`);
       const data = await res.json();
@@ -48,28 +52,24 @@ export default function App() {
     setClips(data.clips || []);
   }
 
-  return (
-    <div className="app-shell">
+  const progress = status?.progress ?? 0; // ✅ no ×100
 
+  return (
+    <div className="page">
+
+      {/* Header */}
       <header className="header">
-        <div className="header-inner">
-          <div>
-            <h1>🎬 AI Shorts Studio</h1>
-            <div style={{color:"#9aa4af", fontSize:14}}>
-              Long video → viral vertical clips
-            </div>
-          </div>
-          <div>MVP</div>
-        </div>
+        <h1>🎬 AI Shorts Studio</h1>
+        <span className="badge">MVP</span>
       </header>
 
-      <main className="container">
+      <div className="layout">
 
         {/* LEFT PANEL */}
-        <div>
+        <div className="left">
 
           <div className="card">
-            <h2>Upload</h2>
+            <h3>Upload Video</h3>
 
             <input
               type="file"
@@ -78,80 +78,92 @@ export default function App() {
             />
 
             <button
-              className="btn btn-primary"
+              className="btn primary"
               onClick={uploadFile}
               disabled={!file}
             >
-              Upload Video
+              Upload
             </button>
 
-            {jobId && (
-              <div style={{fontSize:12, marginTop:10, color:"#9aa4af"}}>
-                Job: {jobId}
-              </div>
-            )}
+            {jobId && <p className="muted">Job: {jobId}</p>}
           </div>
 
-          <div className="card" style={{marginTop:20}}>
-            <h2>Pipeline</h2>
+          {jobId && (
+            <div className="card">
+              <h3>Pipeline</h3>
 
-            <button
-              className="btn btn-accent"
-              onClick={startPipeline}
-              disabled={!jobId || running}
-            >
-              {running ? "Processing…" : "Generate Shorts"}
-            </button>
+              <button
+                className="btn success"
+                onClick={startPipeline}
+                disabled={running}
+              >
+                {running ? "Processing…" : "Generate Shorts"}
+              </button>
 
-            {status && (
-              <div style={{marginTop:10, fontSize:14}}>
-                Status: {status.state}
-              </div>
-            )}
-          </div>
+              {status && (
+                <>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <div className="muted">
+                    {status.stage} • {progress}%
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ✅ Download all */}
+          {clips.length > 0 && (
+            <div className="card">
+              <a
+                href={`${API}/${jobId}/download_zip`}
+                className="btn"
+              >
+                Download All Shorts
+              </a>
+            </div>
+          )}
 
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="card">
-          <h2>Generated Shorts</h2>
+        <div className="right">
 
-          {clips.length === 0 && (
-            <div style={{color:"#9aa4af"}}>
-              No clips yet — run pipeline.
-            </div>
-          )}
+          <div className="card">
+            <h3>Generated Shorts</h3>
 
-          <div className="clips-grid">
-            {clips.map((name) => (
-              <div key={name} className="clip-card">
-                <video
-                  controls
-                  src={`${API}/${jobId}/clips/${name}`}
-                />
-                <div className="clip-footer">
-                  <span>{name}</span>
-                  {/* <a href={`${API}/${jobId}/clips/${name}`} download>
+            {clips.length === 0 && (
+              <p className="muted">No clips yet</p>
+            )}
+
+            <div className="clips-grid">
+              {clips.map((name) => (
+                <div key={name} className="clip-card">
+                  <video
+                    src={`${API}/${jobId}/clips/${name}`}
+                    controls
+                  />
+
+                  <a
+                    href={`${API}/${jobId}/download/${name}`}
+                    className="btn small"
+                    download
+                  >
                     Download
-                  </a> */}
-                  <a href={`${API}/${jobId}/download/${name}`} className="download-btn">⬇ Download</a>
+                  </a>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
           </div>
 
         </div>
 
-        {clips.length > 0 && (
-          <a
-            href={`${API}/${jobId}/download_all`}
-            className="download-all-btn"
-          >
-            Download All Shorts (ZIP)
-          </a>
-        )}
-
-      </main>
+      </div>
     </div>
   );
 }
