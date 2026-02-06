@@ -12,6 +12,8 @@ from app.utils.status import read_status
 
 from fastapi import BackgroundTasks
 
+from fastapi.responses import FileResponse
+
 
 
 
@@ -109,3 +111,26 @@ def run_all_async(job_id: str, bg: BackgroundTasks):
         "state": "started",
         "mode": "background"
     }
+
+@router.get("/{job_id}/clips")
+def list_clips(job_id: str):
+
+    base = Path(__file__).resolve().parents[3]
+    clips_dir = base / "data" / "jobs" / job_id / "clips_vertical_final"
+
+    if not clips_dir.exists():
+        return {"clips": []}
+
+    files = sorted(clips_dir.glob("*.mp4"))
+
+    return {
+        "clips": [f.name for f in files]
+    }
+
+@router.get("/{job_id}/clips/{filename}")
+def get_clip(job_id: str, filename: str):
+
+    base = Path(__file__).resolve().parents[3]
+    path = base / "data" / "jobs" / job_id / "clips_vertical_final" / filename
+
+    return FileResponse(path)

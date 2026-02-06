@@ -6,3 +6,22 @@ data/jobs/
 backend/__pycache__/
 
 .env
+
+# python
+venv/
+__pycache__/
+*.pyc
+
+# node
+frontend/node_modules/
+
+# data outputs
+data/jobs/
+data/tmp/
+
+# env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
