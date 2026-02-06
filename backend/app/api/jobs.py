@@ -7,16 +7,11 @@ from app.pipeline.pipeline import run_cut
 from app.pipeline.pipeline import run_captions
 from app.pipeline.pipeline import run_vertical
 from app.pipeline.pipeline import run_all
-
 from app.utils.status import read_status
-
 from fastapi import BackgroundTasks
-
 from fastapi.responses import FileResponse
 
-
-
-
+import zipfile
 import shutil
 from pathlib import Path
 import uuid
@@ -152,3 +147,24 @@ def download_clip(job_id: str, name: str):
         )
 
     raise HTTPException(404, "Clip not found")
+
+@router.get("/{job_id}/download_all")
+def download_all(job_id: str):
+
+    job_dir = DATA_DIR / job_id
+    clips_dir = job_dir / "clips_vertical_final"
+
+    if not clips_dir.exists():
+        raise HTTPException(404, "No clips folder")
+
+    zip_path = job_dir / "shorts.zip"
+
+    with zipfile.ZipFile(zip_path, "w") as z:
+        for clip in clips_dir.glob("*.mp4"):
+            z.write(clip, arcname=clip.name)
+
+    return FileResponse(
+        zip_path,
+        media_type="application/zip",
+        filename="shorts.zip"
+    )

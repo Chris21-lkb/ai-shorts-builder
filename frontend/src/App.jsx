@@ -142,6 +142,15 @@ export default function App() {
 
         </div>
 
+        {clips.length > 0 && (
+          <a
+            href={`${API}/${jobId}/download_all`}
+            className="download-all-btn"
+          >
+            Download All Shorts (ZIP)
+          </a>
+        )}
+
       </main>
     </div>
   );

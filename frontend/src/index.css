@@ -128,3 +128,14 @@ a {
 .download-btn:hover {
   background: #2a3441;
 }
+
+.download-all-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: linear-gradient(90deg,#a78bfa,#6366f1);
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 16px;
+}
