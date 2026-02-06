@@ -10,6 +10,8 @@ from app.pipeline.pipeline import run_all
 
 from app.utils.status import read_status
 
+from fastapi import BackgroundTasks
+
 
 
 
@@ -96,3 +98,14 @@ def job_status(job_id: str):
     job_dir = base / "data" / "jobs" / job_id
 
     return read_status(job_dir)
+
+@router.post("/{job_id}/run_all_async")
+def run_all_async(job_id: str, bg: BackgroundTasks):
+
+    bg.add_task(run_all, job_id)
+
+    return {
+        "job_id": job_id,
+        "state": "started",
+        "mode": "background"
+    }
