@@ -17,17 +17,12 @@ export default function App() {
   const [status, setStatus] = useState(null);
   const [clips, setClips] = useState([]);
   const [running, setRunning] = useState(false);
-  const [mode, setMode] = useState("upload"); // upload | url
+  const [mode, setMode] = useState("upload");
 
   async function uploadFile() {
     const form = new FormData();
     form.append("file", file);
-
-    const res = await fetch(`${API}/upload`, {
-      method: "POST",
-      body: form,
-    });
-
+    const res = await fetch(`${API}/upload`, { method: "POST", body: form });
     const data = await res.json();
     setJobId(data.job_id);
     setStatus(null);
@@ -40,7 +35,6 @@ export default function App() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     });
-
     const data = await res.json();
     setJobId(data.job_id);
     setStatus(null);
@@ -50,7 +44,6 @@ export default function App() {
   async function startPipeline() {
     if (!jobId) return;
     setRunning(true);
-
     await fetch(`${API}/${jobId}/run_all_async`, { method: "POST" });
     pollStatus(jobId);
   }
@@ -88,29 +81,26 @@ export default function App() {
   return (
     <div className="app">
 
-      {/* NAVBAR */}
+      {/* NAV */}
       <header className="nav">
         <div className="nav-left">
-          <div className="logo">▶ 2short.ai</div>
-          <nav>
-            <span className="nav-item active">Dashboard</span>
-            <span className="nav-item">My Content</span>
-            <span className="nav-item">Pricing</span>
-          </nav>
+          <div className="brand">▶ 2short.ai</div>
+          <div className="nav-links">
+            <span className="active">Dashboard</span>
+            <span>My Content</span>
+            <span>Pricing</span>
+          </div>
         </div>
-        <div className="nav-right">
-          <div className="avatar">J</div>
-        </div>
+        <div className="avatar">J</div>
       </header>
 
-      <main className="container">
+      <div className="page">
 
-        {/* HERO CARD */}
-        <section className="hero-card">
+        {/* HERO */}
+        <div className="hero-card">
           <h1>Upload Your Long Video</h1>
-          <p>Transform your content into engaging short videos with AI</p>
+          <p>Transform your content into engaging short videos with the power of AI.</p>
 
-          {/* MODE TABS */}
           <div className="tabs">
             <button
               className={mode === "upload" ? "tab active" : "tab"}
@@ -126,34 +116,41 @@ export default function App() {
             </button>
           </div>
 
-          {/* TAB CONTENT */}
           {mode === "upload" && (
-            <div className="input-row">
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
+            <>
+              <label className="dropzone">
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => setFile(e.target.files[0])}
+                />
+                <div>
+                  <div className="drop-icon">⬆</div>
+                  <div>Drag & drop your video here</div>
+                  <div className="drop-sub">MP4, MOV, AVI</div>
+                </div>
+              </label>
+
               <button
-                className="btn primary"
+                className="btn purple"
                 disabled={!file}
                 onClick={uploadFile}
               >
                 Upload
               </button>
-            </div>
+            </>
           )}
 
           {mode === "url" && (
-            <div className="input-row">
+            <div className="url-row">
               <input
                 type="text"
-                placeholder="Paste YouTube URL..."
+                placeholder="Paste a YouTube video URL..."
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
               />
               <button
-                className="btn primary"
+                className="btn purple"
                 disabled={!url}
                 onClick={createFromUrl}
               >
@@ -170,56 +167,57 @@ export default function App() {
             Generate Shorts
           </button>
 
-          {/* PROGRESS */}
-          <div className="progress-wrap">
-            <div className="progress">
-              <div
-                className="progress-bar"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <span>{running ? `${progress}%` : status?.state || "idle"}</span>
+          <div className="progress">
+            <div className="bar" style={{ width: `${progress}%` }} />
           </div>
-        </section>
+        </div>
 
-        {/* RESULTS */}
-        <section className="results-card">
-          <div className="results-header">
-            <h2>Your Auto-Generated Shorts</h2>
-            <button
-              className="btn ghost"
-              disabled={!clips.length}
-              onClick={downloadAll}
-            >
+        {/* STATUS BANNER */}
+        {status?.state === "done" && (
+          <div className="status-banner">
+            <div>✅ Processing Complete</div>
+            <div>{clips.length} Shorts Created</div>
+            <button className="btn white" onClick={downloadAll}>
               Download All
             </button>
           </div>
+        )}
 
-          {clips.length === 0 && (
-            <div className="empty">
-              No shorts yet — upload or paste a link.
+        {/* RESULTS */}
+        <div className="results">
+          <div className="results-left">
+            <h2>Your Auto-Generated Shorts</h2>
+
+            {clips.length === 0 && (
+              <div className="empty">No shorts yet — upload or paste a link.</div>
+            )}
+
+            <div className="clips-grid">
+              {clips.map((name) => (
+                <div key={name} className="clip-card">
+                  <video src={`${API}/${jobId}/clips/${name}`} controls />
+                  <button
+                    className="btn small"
+                    onClick={() => downloadClip(name)}
+                  >
+                    Download
+                  </button>
+                </div>
+              ))}
             </div>
-          )}
-
-          <div className="grid">
-            {clips.map((name) => (
-              <div key={name} className="clip">
-                <video
-                  src={`${API}/${jobId}/clips/${name}`}
-                  controls
-                />
-                <button
-                  className="btn small"
-                  onClick={() => downloadClip(name)}
-                >
-                  Download
-                </button>
-              </div>
-            ))}
           </div>
-        </section>
 
-      </main>
+          <div className="tips">
+            <h3>Tips for Going Viral</h3>
+            <ul>
+              <li>🔥 Hook viewers quickly</li>
+              <li>⚡ Keep it snappy</li>
+              <li>😊 Add captions & emojis</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
