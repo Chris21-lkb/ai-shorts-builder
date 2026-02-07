@@ -17,8 +17,8 @@ export default function App() {
   const [status, setStatus] = useState(null);
   const [clips, setClips] = useState([]);
   const [running, setRunning] = useState(false);
+  const [mode, setMode] = useState("upload"); // upload | url
 
-  // ---------- upload ----------
   async function uploadFile() {
     const form = new FormData();
     form.append("file", file);
@@ -34,7 +34,6 @@ export default function App() {
     setClips([]);
   }
 
-  // ---------- from URL ----------
   async function createFromUrl() {
     const res = await fetch(`${API}/from_url`, {
       method: "POST",
@@ -48,16 +47,11 @@ export default function App() {
     setClips([]);
   }
 
-  // ---------- pipeline ----------
   async function startPipeline() {
     if (!jobId) return;
-
     setRunning(true);
 
-    await fetch(`${API}/${jobId}/run_all_async`, {
-      method: "POST",
-    });
-
+    await fetch(`${API}/${jobId}/run_all_async`, { method: "POST" });
     pollStatus(jobId);
   }
 
@@ -81,127 +75,135 @@ export default function App() {
     setClips(data.clips || []);
   }
 
-  // ---------- downloads ----------
   function downloadClip(name) {
     window.location.href = `${API}/${jobId}/download/${name}`;
   }
-
-  // function downloadAll() {
-  //   clips.forEach((name, i) => {
-  //     setTimeout(() => downloadClip(name), i * 400);
-  //   });
-  // }
 
   function downloadAll() {
     window.location.href = `${API}/${jobId}/download_zip`;
   }
 
-
   const progress = stageToPercent(status);
 
   return (
-    <div className="app-root">
+    <div className="app">
 
-      {/* HEADER */}
-      <header className="topbar">
-        <div className="logo">🎬 AI Shorts Studio</div>
-        <div className="badge">URL + Upload</div>
+      {/* NAVBAR */}
+      <header className="nav">
+        <div className="nav-left">
+          <div className="logo">▶ 2short.ai</div>
+          <nav>
+            <span className="nav-item active">Dashboard</span>
+            <span className="nav-item">My Content</span>
+            <span className="nav-item">Pricing</span>
+          </nav>
+        </div>
+        <div className="nav-right">
+          <div className="avatar">J</div>
+        </div>
       </header>
 
-      <div className="layout">
+      <main className="container">
 
-        {/* LEFT PANEL */}
-        <div className="left-panel">
+        {/* HERO CARD */}
+        <section className="hero-card">
+          <h1>Upload Your Long Video</h1>
+          <p>Transform your content into engaging short videos with AI</p>
 
-          {/* Upload */}
-          <div className="card">
-            <h3>Upload Video</h3>
-
-            <input
-              type="file"
-              accept="video/*"
-              onChange={(e) => setFile(e.target.files[0])}
-            />
-
+          {/* MODE TABS */}
+          <div className="tabs">
             <button
-              className="btn primary"
-              onClick={uploadFile}
-              disabled={!file}
+              className={mode === "upload" ? "tab active" : "tab"}
+              onClick={() => setMode("upload")}
             >
-              Upload
+              Upload Video
+            </button>
+            <button
+              className={mode === "url" ? "tab active" : "tab"}
+              onClick={() => setMode("url")}
+            >
+              YouTube Link
             </button>
           </div>
 
-          {/* URL */}
-          <div className="card">
-            <h3>From URL</h3>
+          {/* TAB CONTENT */}
+          {mode === "upload" && (
+            <div className="input-row">
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+              <button
+                className="btn primary"
+                disabled={!file}
+                onClick={uploadFile}
+              >
+                Upload
+              </button>
+            </div>
+          )}
 
-            <input
-              type="text"
-              placeholder="Paste YouTube link…"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
+          {mode === "url" && (
+            <div className="input-row">
+              <input
+                type="text"
+                placeholder="Paste YouTube URL..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+              />
+              <button
+                className="btn primary"
+                disabled={!url}
+                onClick={createFromUrl}
+              >
+                Fetch
+              </button>
+            </div>
+          )}
 
-            <button
-              className="btn ghost"
-              onClick={createFromUrl}
-              disabled={!url}
-            >
-              Fetch Video
-            </button>
-          </div>
+          <button
+            className="btn generate"
+            disabled={!jobId || running}
+            onClick={startPipeline}
+          >
+            Generate Shorts
+          </button>
 
-          {/* Pipeline */}
-          <div className="card">
-            <h3>Pipeline</h3>
-
-            <button
-              className="btn accent"
-              onClick={startPipeline}
-              disabled={!jobId || running}
-            >
-              Generate Shorts
-            </button>
-
+          {/* PROGRESS */}
+          <div className="progress-wrap">
             <div className="progress">
               <div
                 className="progress-bar"
                 style={{ width: `${progress}%` }}
               />
             </div>
-
-            <div className="progress-text">
-              {running ? `${progress}%` : status?.state || "idle"}
-            </div>
+            <span>{running ? `${progress}%` : status?.state || "idle"}</span>
           </div>
+        </section>
 
-          {/* Download all */}
-          <div className="card">
+        {/* RESULTS */}
+        <section className="results-card">
+          <div className="results-header">
+            <h2>Your Auto-Generated Shorts</h2>
             <button
               className="btn ghost"
               disabled={!clips.length}
               onClick={downloadAll}
             >
-              Download All Shorts
+              Download All
             </button>
           </div>
 
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className="right-panel">
-          <h3>Generated Shorts</h3>
-
           {clips.length === 0 && (
             <div className="empty">
-              No shorts yet — upload or fetch a video.
+              No shorts yet — upload or paste a link.
             </div>
           )}
 
-          <div className="clips-grid">
+          <div className="grid">
             {clips.map((name) => (
-              <div key={name} className="clip-card">
+              <div key={name} className="clip">
                 <video
                   src={`${API}/${jobId}/clips/${name}`}
                   controls
@@ -215,9 +217,9 @@ export default function App() {
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-      </div>
+      </main>
     </div>
   );
 }
