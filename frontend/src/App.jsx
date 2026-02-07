@@ -86,11 +86,16 @@ export default function App() {
     window.location.href = `${API}/${jobId}/download/${name}`;
   }
 
+  // function downloadAll() {
+  //   clips.forEach((name, i) => {
+  //     setTimeout(() => downloadClip(name), i * 400);
+  //   });
+  // }
+
   function downloadAll() {
-    clips.forEach((name, i) => {
-      setTimeout(() => downloadClip(name), i * 400);
-    });
+    window.location.href = `${API}/${jobId}/download_zip`;
   }
+
 
   const progress = stageToPercent(status);
 

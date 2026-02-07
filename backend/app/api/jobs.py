@@ -172,6 +172,27 @@ def download_all(job_id: str):
         filename="shorts.zip"
     )
 
+@router.get("/{job_id}/download_zip")
+def download_all_zip(job_id: str):
+
+    job_dir = DATA_DIR / job_id
+
+    clips_dir = job_dir / "clips_vertical_final"
+    if not clips_dir.exists():
+        raise HTTPException(404, "No clips folder")
+
+    zip_path = job_dir / "shorts.zip"
+
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+        for clip in clips_dir.glob("*.mp4"):
+            z.write(clip, arcname=clip.name)
+
+    return FileResponse(
+        zip_path,
+        media_type="application/zip",
+        filename=f"{job_id}_shorts.zip"
+    )
+
 
 @router.post("/from_url")
 def create_job_from_url(url: str = Body(..., embed=True)):
