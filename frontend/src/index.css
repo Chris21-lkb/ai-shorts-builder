@@ -164,3 +164,20 @@ padding:20px;
 }
 
 .empty{color:#6b7280;padding:20px 0}
+
+.dropzone.has-file {
+  border: 2px solid #22c55e;
+  background: #f0fdf4;
+}
+
+.file-picked {
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.preview {
+  width: 320px;
+  border-radius: 14px;
+  margin: 12px auto;
+  display: block;
+}

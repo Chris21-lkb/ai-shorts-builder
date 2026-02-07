@@ -116,7 +116,7 @@ export default function App() {
             </button>
           </div>
 
-          {mode === "upload" && (
+          {/* {mode === "upload" && (
             <>
               <label className="dropzone">
                 <input
@@ -139,7 +139,50 @@ export default function App() {
                 Upload
               </button>
             </>
+          )} */}
+
+          {mode === "upload" && (
+            <>
+              <label className={`dropzone ${file ? "has-file" : ""}`}>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => setFile(e.target.files[0])}
+                />
+
+                {!file && (
+                  <div>
+                    <div className="drop-icon">⬆</div>
+                    <div>Drag & drop your video here</div>
+                    <div className="drop-sub">MP4, MOV, AVI</div>
+                  </div>
+                )}
+
+                {file && (
+                  <div className="file-picked">
+                    ✅ Selected: {file.name}
+                  </div>
+                )}
+              </label>
+
+              {/* {file && (
+                <video
+                  className="preview"
+                  src={URL.createObjectURL(file)}
+                  controls
+                />
+              )} */}
+
+              <button
+                className="btn purple"
+                disabled={!file}
+                onClick={uploadFile}
+              >
+                Upload
+              </button>
+            </>
           )}
+
 
           {mode === "url" && (
             <div className="url-row">
