@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const API = "http://127.0.0.1:8000/jobs";
 const STAGE_COUNT = 7;
@@ -12,6 +12,7 @@ function stageToPercent(status) {
 
 export default function App() {
   const [file, setFile] = useState(null);
+  const [url, setUrl] = useState("");
   const [jobId, setJobId] = useState(null);
   const [status, setStatus] = useState(null);
   const [clips, setClips] = useState([]);
@@ -25,6 +26,20 @@ export default function App() {
     const res = await fetch(`${API}/upload`, {
       method: "POST",
       body: form,
+    });
+
+    const data = await res.json();
+    setJobId(data.job_id);
+    setStatus(null);
+    setClips([]);
+  }
+
+  // ---------- from URL ----------
+  async function createFromUrl() {
+    const res = await fetch(`${API}/from_url`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
     });
 
     const data = await res.json();
@@ -81,16 +96,19 @@ export default function App() {
 
   return (
     <div className="app-root">
+
       {/* HEADER */}
       <header className="topbar">
         <div className="logo">🎬 AI Shorts Studio</div>
-        <div className="badge">MVP</div>
+        <div className="badge">URL + Upload</div>
       </header>
 
-      {/* MAIN LAYOUT */}
       <div className="layout">
+
         {/* LEFT PANEL */}
         <div className="left-panel">
+
+          {/* Upload */}
           <div className="card">
             <h3>Upload Video</h3>
 
@@ -107,10 +125,29 @@ export default function App() {
             >
               Upload
             </button>
-
-            {jobId && <p className="job-id">Job: {jobId}</p>}
           </div>
 
+          {/* URL */}
+          <div className="card">
+            <h3>From URL</h3>
+
+            <input
+              type="text"
+              placeholder="Paste YouTube link…"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+
+            <button
+              className="btn ghost"
+              onClick={createFromUrl}
+              disabled={!url}
+            >
+              Fetch Video
+            </button>
+          </div>
+
+          {/* Pipeline */}
           <div className="card">
             <h3>Pipeline</h3>
 
@@ -134,6 +171,7 @@ export default function App() {
             </div>
           </div>
 
+          {/* Download all */}
           <div className="card">
             <button
               className="btn ghost"
@@ -143,15 +181,16 @@ export default function App() {
               Download All Shorts
             </button>
           </div>
+
         </div>
 
-        {/* RIGHT PANEL — SHORTS */}
+        {/* RIGHT PANEL */}
         <div className="right-panel">
           <h3>Generated Shorts</h3>
 
           {clips.length === 0 && (
             <div className="empty">
-              No shorts yet — run the pipeline.
+              No shorts yet — upload or fetch a video.
             </div>
           )}
 
@@ -172,6 +211,7 @@ export default function App() {
             ))}
           </div>
         </div>
+
       </div>
     </div>
   );

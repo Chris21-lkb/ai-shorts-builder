@@ -16,6 +16,9 @@ import shutil
 from pathlib import Path
 import uuid
 
+import subprocess
+from fastapi import Body
+
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 
@@ -168,3 +171,51 @@ def download_all(job_id: str):
         media_type="application/zip",
         filename="shorts.zip"
     )
+
+
+@router.post("/from_url")
+def create_job_from_url(url: str = Body(..., embed=True)):
+
+    job_id = uuid.uuid4().hex
+    job_dir = DATA_DIR / job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+
+    out_template = str(job_dir / "input.%(ext)s")
+
+    cmd = [
+        "yt-dlp",
+
+        # ✅ best video + best audio
+        "-f", "bv*+ba/b",
+
+        # ✅ merge into mp4
+        "--merge-output-format", "mp4",
+
+        # ✅ output path template
+        "-o", out_template,
+
+        url
+    ]
+
+    result = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+
+    print(result.stdout)
+
+    # yt-dlp may produce input.mp4 or input.webm → normalize
+    mp4_path = job_dir / "input.mp4"
+
+    if not mp4_path.exists():
+        # try to find any produced file and rename
+        for f in job_dir.glob("input.*"):
+            f.rename(mp4_path)
+            break
+
+    if not mp4_path.exists():
+        raise HTTPException(400, "Download failed")
+
+    return {"job_id": job_id}
